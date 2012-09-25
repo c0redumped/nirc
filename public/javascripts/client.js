@@ -40,14 +40,21 @@
       var timestamp = $("<span>").addClass('timestamp').text(new Date().toString().split(' ')[4]);
       newLine.append(timestamp);
 
+      var actionMatch = msgData.message.match(/\u0001ACTION (.*)\u0001/);
+
       if (msgType == 'channel' && msgData.from !== undefined) {
         if (!tab.hasClass('active')) {
           tab.addClass('new-msgs');
         }
 
-        var msgFrom = $('<span>').addClass('from').text(msgData.from + ': ');
+        var msgFrom = $('<span>').addClass('from').text(msgData.from);
         var mentionRegex = new RegExp("(^|[^a-zA-Z0-9\\[\\]{}\\^`|])" + options.nickname + "([^a-zA-Z0-9\\[\\]{}\\^`|]|$)", 'i');
         var containsMention = msgData.message.match(mentionRegex);
+        if (actionMatch) {
+          msgFrom.prepend('* ').append(' ');
+        } else {
+          msgFrom.append(': ');
+        }
 
         if (msgData.fromYou) {
           msgFrom.addClass('from-you');
@@ -73,8 +80,8 @@
         newLine.append(msgFrom);
       }
       
-      actualMsg.text(msgData.message);
-      newLine.append(actualMsg);
+      actualMsg.text(actionMatch ? actionMatch[1] : msgData.message)
+      newLine.append(actualMsg)
 
       tabView.append(newLine)
              .scrollTop(tabView[0].scrollHeight);
